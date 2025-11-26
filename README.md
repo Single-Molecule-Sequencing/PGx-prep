@@ -39,7 +39,7 @@ python3 indexBAM.py -i <bam_directory> -j <num_jobs>
 
 ### `mergeBAM.py`
 
-Generates `samtools merge` commands from a SampleSheet.
+Generates `samtools merge` commands from a SampleSheet obtained at [SSS](https://single-molecule-sequencing.github.io/sss/).
 
 ```bash
 python3 mergeBAM.py <samplesheet_csv> -d <bam_directory> -o <output_directory> -f <output_file>
@@ -201,5 +201,5 @@ python3 submitAll.py -i Sbatch/merge
 ## Future Plans
 
 -   A master script to execute the entire workflow sequentially.
--   Potentially turnning this into a NextFlow workflow.
+-   Potentially turning this into a NextFlow workflow.
 -   Pray to the Automation God that this all will work properly.
