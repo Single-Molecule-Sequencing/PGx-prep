@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+# indexBAM.py
+# Index all BAM files in a directory in parallel
+
+import os
+import sys
+import glob
+import argparse
+import subprocess
+from multiprocessing import Pool
+
+
+#########
+# funcs #
+#########
+
+def worker(bam_path):
+	subprocess.run(["samtools", "index", bam_path])
+	print(f"[indexBAM] Indexed: {os.path.basename(bam_path)}")
+
+
+############
+# argparse #
+############
+
+parser = argparse.ArgumentParser(description="Parallel BAM Indexer")
+parser.add_argument("-i", "--input", required=True,
+	help="Path to the directory containing BAM files")
+parser.add_argument("-j", "--jobs", type=int, default=4,
+	help="Number of parallel jobs [%(default)i]")
+args = parser.parse_args()
+
+
+###########
+# warning #
+###########
+
+# Checks if the user is running interactively in the terminal
+# Suggests using nohup if they are
+if sys.stdout.isatty():
+	print("----------------------------------------------------------------")
+	print("TIP: This process may take a long time.")
+	print("If you haven't already, consider stopping this and running with nohup:")
+	print(f"   nohup python3 {sys.argv[0]} -i {args.input} -j {args.jobs} > index.log 2>&1 &")
+	print("----------------------------------------------------------------")
+
+
+########
+# main #
+########
+
+target_dir = os.path.abspath(os.path.expanduser(args.input))
+
+if not os.path.exists(target_dir):
+	sys.exit(f"[indexBAM] Error: Directory {args.input} does not exist")
+
+bam_files = glob.glob(os.path.join(target_dir, "*.bam"))
+num_files = len(bam_files)
+
+print(f"[indexBAM] Checking directory: {target_dir}")
+print(f"[indexBAM] Found {num_files} BAM files")
+
+if num_files == 0:
+	sys.exit(f"[indexBAM] Error: {args.input} has 0 BAM files")
+
+print(f"[indexBAM] Starting indexing with {args.jobs} parallel jobs...")
+
+pool = Pool(processes=args.jobs)
+pool.map(worker, bam_files)
+pool.close()
+pool.join()
+
+print("[indexBAM] Indexing completed")
