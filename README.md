@@ -1,6 +1,6 @@
 # PGx-prep
 
-Preparatory post-adaptive-sampling demultiplex algorithms and HPC+Slurm solutions for processing BAM files ahead of the ONT's PGx workflow.
+Preparatory post-basecalling demultiplex algorithms and HPC+Slurm solutions for processing BAM files ahead of the ONT's PGx workflow.
 
 This repository provides a suite of Python scripts to automate the sorting, indexing, and merging of BAM files, tailored for high-performance computing (HPC) environments using the Slurm workload manager.
 
