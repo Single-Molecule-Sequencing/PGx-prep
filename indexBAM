@@ -2,12 +2,12 @@
 # indexBAM.py
 # Index all BAM files in a directory in parallel
 
-import os
-import sys
-import glob
 import argparse
-import subprocess
+import glob
 from multiprocessing import Pool
+import os
+import subprocess
+import sys
 
 
 #########

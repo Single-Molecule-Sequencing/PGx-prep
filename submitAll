@@ -2,12 +2,12 @@
 # submitAll.py
 # Batch submit sbatch files from a directory
 
-import os
-import sys
-import glob
-import time
 import argparse
+import glob
+import os
 import subprocess
+import sys
+import time
 
 
 ############
