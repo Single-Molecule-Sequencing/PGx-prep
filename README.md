@@ -6,43 +6,43 @@ This repository provides a suite of Python scripts to automate the sorting, inde
 
 ## Manifest
 
--   `sortBAM.py`: Generates `samtools sort` commands for all BAM files in a given directory.
--   `indexBAM.py`: Indexes all BAM files in a directory using parallel processing.
--   `mergeBAM.py`: Generates `samtools merge` commands for grouping BAM files by sample, based on a `SampleSheet.csv` file.
--   `cmdtxt2sbatch.py`: Converts a text file of shell commands into individual Slurm `.sbatch` scripts for job submission.
--   `submitAll.py`: Submits all `.sbatch` files in a specified directory to the Slurm scheduler.
+-   `sortBAM`: Generates `samtools sort` commands for all BAM files in a given directory.
+-   `indexBAM`: Indexes all BAM files in a directory using parallel processing.
+-   `mergeBAM`: Generates `samtools merge` commands for grouping BAM files by sample, based on a `SampleSheet.csv` file.
+-   `cmdtxt2sbatch`: Converts a text file of shell commands into individual Slurm `.sbatch` scripts for job submission.
+-   `submitAll`: Submits all `.sbatch` files in a specified directory to the Slurm scheduler.
 
 ## Usage
 
-### `sortBAM.py`
+### `sortBAM`
 
 Generates `samtools sort` commands.
 
 ```bash
-python3 sortBAM.py -d <bam_directory> -o <output_directory> -f <output_file>
+sortBAM -d <bam_directory> -o <output_directory> -f <output_file>
 ```
 
 -   `-d, --bamdir`: Directory containing input BAM files (default: `.`).
 -   `-o, --outdir`: Directory to store sorted BAMs (default: `./Sorted`).
 -   `-f, --outfile`: Output file to write sort commands (default: `sortCMDs.txt`).
 
-### `indexBAM.py`
+### `indexBAM`
 
 Indexes BAM files in parallel.
 
 ```bash
-python3 indexBAM.py -i <bam_directory> -j <num_jobs>
+indexBAM -i <bam_directory> -j <num_jobs>
 ```
 
 -   `-i, --input`: Path to the directory containing BAM files (required).
 -   `-j, --jobs`: Number of parallel jobs to run (default: 4).
 
-### `mergeBAM.py`
+### `mergeBAM`
 
 Generates `samtools merge` commands from a SampleSheet obtained at [SSS](https://single-molecule-sequencing.github.io/sss/).
 
 ```bash
-python3 mergeBAM.py <samplesheet_csv> -d <bam_directory> -o <output_directory> -f <output_file>
+mergeBAM <samplesheet_csv> -d <bam_directory> -o <output_directory> -f <output_file>
 ```
 
 -   `csv`: Path to the SampleSheet CSV file (required).
@@ -50,12 +50,12 @@ python3 mergeBAM.py <samplesheet_csv> -d <bam_directory> -o <output_directory> -
 -   `-o, --outdir`: Directory to store merged BAMs (default: `./Merged`).
 -   `-f, --outfile`: Output file to write merge commands (default: `mergeCMDs.txt`).
 
-### `cmdtxt2sbatch.py`
+### `cmdtxt2sbatch`
 
 Generates `.sbatch` files from a command list.
 
 ```bash
-python3 cmdtxt2sbatch.py -i <input_file> -a <slurm_account> [options]
+cmdtxt2sbatch -i <input_file> -a <slurm_account> [options]
 ```
 
 -   `-i, --input`: Path to input text file with one command per line (required).
@@ -71,12 +71,12 @@ python3 cmdtxt2sbatch.py -i <input_file> -a <slurm_account> [options]
 -   `--job-prefix`: Prefix for job names (default: `job`).
 -   `--module`: Optional module to load.
 
-### `submitAll.py`
+### `submitAll`
 
 Submits all `.sbatch` files in a directory.
 
 ```bash
-python3 submitAll.py -i <sbatch_directory>
+submitAll -i <sbatch_directory>
 ```
 
 -   `-i, --input`: Directory containing `.sbatch` files (default: `./Sbatch`).
@@ -96,12 +96,12 @@ Input: Directory of BAM files (e.g., 'BAMs/')
   │ Input: 'BAMs/'
   │ Output: 'Sorted/' directory with sorted BAMs
   │
-  ├─► python3 sortBAM.py -d BAMs -o Sorted -f sortCMDs.txt
+  ├─► sortBAM -d BAMs -o Sorted -f sortCMDs.txt
   │
-  ├─► python3 cmdtxt2sbatch.py -i sortCMDs.txt -o Sbatch/sort --account bleu99 --partition standard \
+  ├─► cmdtxt2sbatch -i sortCMDs.txt -o Sbatch/sort --account bleu99 --partition standard \
   │     --cpus 4 --mem 16G --time 03:00:00 --email theatheylab@gmail.com --job-prefix sort
   │
-  └─► python3 submitAll.py -i Sbatch/sort
+  └─► submitAll -i Sbatch/sort
   │
   ▼
 ┌───────────────────┐
@@ -111,7 +111,7 @@ Input: Directory of BAM files (e.g., 'BAMs/')
   │ Input: 'Sorted/'
   │ Output: '.bai' index files in 'Sorted/'
   │
-  └─► nohup python3 indexBAM.py -i Sorted -j 8 > index.log 2>&1 &
+  └─► nohup indexBAM -i Sorted -j 8 > index.log 2>&1 &
   │
   ▼
 ┌───────────────────┐
@@ -121,12 +121,12 @@ Input: Directory of BAM files (e.g., 'BAMs/')
   │ Input: 'Sorted/' directory, 'SampleSheet.csv'
   │ Output: 'Merged/' directory with merged BAMs
   │
-  ├─► python3 mergeBAM.py SampleSheet.csv -d Sorted -o Merged -f mergeCMDs.txt
+  ├─► mergeBAM SampleSheet.csv -d Sorted -o Merged -f mergeCMDs.txt
   │
-  ├─► python3 cmdtxt2sbatch.py -i mergeCMDs.txt -o Sbatch/merge --account bleu99 --partition standard \
+  ├─► cmdtxt2sbatch -i mergeCMDs.txt -o Sbatch/merge --account bleu99 --partition standard \
   │     --cpus 2 --mem 8G --time 03:00:00 --email theatheylab@gmail.com --job-prefix merge
   │
-  └─► python3 submitAll.py -i Sbatch/merge
+  └─► submitAll -i Sbatch/merge
   │
   ▼
 Final Output: Directory of sorted, indexed, and merged BAM files ready for the PGx workflow.
@@ -137,13 +137,13 @@ Final Output: Directory of sorted, indexed, and merged BAM files ready for the P
 First, generate the `samtools sort` commands. This example assumes the raw BAMs are in a directory named `BAMs/`.
 
 ```bash
-python3 sortBAM.py -d BAMs -o Sorted -f sortCMDs.txt
+sortBAM -d BAMs -o Sorted -f sortCMDs.txt
 ```
 
 Next, convert the commands into Slurm jobs. The following command creates `.sbatch` files in `Sbatch/sort/`.
 
 ```bash
-python3 cmdtxt2sbatch.py \
+cmdtxt2sbatch \
   -i sortCMDs.txt \
   -o Sbatch/sort \
   -a bleu99 \
@@ -158,7 +158,7 @@ python3 cmdtxt2sbatch.py \
 Finally, submit all sorting jobs to Slurm.
 
 ```bash
-python3 submitAll.py -i Sbatch/sort
+submitAll -i Sbatch/sort
 ```
 
 ### Step 2: Index Sorted BAM Files
@@ -166,7 +166,7 @@ python3 submitAll.py -i Sbatch/sort
 After the sorting jobs are complete, index the sorted BAM files in the `Sorted/` directory. It is recommended to run this process with `nohup` to prevent interruptions.
 
 ```bash
-nohup python3 indexBAM.py -i Sorted -j 8 > index.log 2>&1 &
+nohup indexBAM -i Sorted -j 8 > index.log 2>&1 &
 ```
 
 ### Step 3: Merge BAM Files by Sample
@@ -174,13 +174,13 @@ nohup python3 indexBAM.py -i Sorted -j 8 > index.log 2>&1 &
 Generate merge commands using a `SampleSheet.csv` file.
 
 ```bash
-python3 mergeBAM.py SampleSheet.csv -d Sorted -o Merged -f mergeCMDs.txt
+mergeBAM SampleSheet.csv -d Sorted -o Merged -f mergeCMDs.txt
 ```
 
 Convert the merge commands into Slurm jobs, writing the `.sbatch` files to `Sbatch/merge/`.
 
 ```bash
-python3 cmdtxt2sbatch.py \
+cmdtxt2sbatch \
   -i mergeCMDs.txt \
   -o Sbatch/merge \
   -a bleu99 \
@@ -195,7 +195,7 @@ python3 cmdtxt2sbatch.py \
 Submit the merge jobs.
 
 ```bash
-python3 submitAll.py -i Sbatch/merge
+submitAll -i Sbatch/merge
 ```
 
 ## Future Plans
