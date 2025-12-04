@@ -2,13 +2,13 @@
 
 Preparatory post-basecalling demultiplex algorithms and HPC+Slurm solutions for processing BAM files ahead of the ONT's PGx workflow.
 
-This repository provides a suite of Python scripts to automate the sorting, indexing, and merging of BAM files, tailored for high-performance computing (HPC) environments using the Slurm workload manager.
+This repository provides a suite of Python scripts to automate the sorting, merging, and indexing of BAM files, tailored for high-performance computing (HPC) environments using the Slurm workload manager.
 
 ## Manifest
 
 -   `sortBAM`: Generates `samtools sort` commands for all BAM files in a given directory.
--   `indexBAM`: Indexes all BAM files in a directory using parallel processing.
 -   `mergeBAM`: Generates `samtools merge` commands for grouping BAM files by sample, based on a `SampleSheet.csv` file.
+-   `indexBAM`: Indexes all BAM files in a directory using parallel processing.
 -   `cmdtxt2sbatch`: Converts a text file of shell commands into individual Slurm `.sbatch` scripts for job submission.
 -   `submitAll`: Submits all `.sbatch` files in a specified directory to the Slurm scheduler.
 
@@ -26,17 +26,6 @@ sortBAM -d <bam_directory> -o <output_directory> -f <output_file>
 -   `-o, --outdir`: Directory to store sorted BAMs (default: `./Sorted`).
 -   `-f, --outfile`: Output file to write sort commands (default: `sortCMDs.txt`).
 
-### `indexBAM`
-
-Indexes BAM files in parallel.
-
-```bash
-indexBAM -i <bam_directory> -j <num_jobs>
-```
-
--   `-i, --input`: Path to the directory containing BAM files (required).
--   `-j, --jobs`: Number of parallel jobs to run (default: 4).
-
 ### `mergeBAM`
 
 Generates `samtools merge` commands from a SampleSheet obtained at [SSS](https://single-molecule-sequencing.github.io/sss/).
@@ -49,6 +38,17 @@ mergeBAM <samplesheet_csv> -d <bam_directory> -o <output_directory> -f <output_f
 -   `-d, --bamdir`: Directory containing sorted & indexed BAM files (default: `.`).
 -   `-o, --outdir`: Directory to store merged BAMs (default: `./Merged`).
 -   `-f, --outfile`: Output file to write merge commands (default: `mergeCMDs.txt`).
+
+### `indexBAM`
+
+Indexes BAM files in parallel.
+
+```bash
+indexBAM -i <bam_directory> -j <num_jobs>
+```
+
+-   `-i, --input`: Path to the directory containing BAM files (required).
+-   `-j, --jobs`: Number of parallel jobs to run (default: 4).
 
 ### `cmdtxt2sbatch`
 
@@ -89,9 +89,9 @@ The workflow expects a directory of raw BAM files as the initial input.
 Input: Directory of BAM files (e.g., 'BAMs/')
   │
   ▼
-┌───────────────────┐
-│   1. Sort BAMs    │
-└───────────────────┘
+┌────────────────┐
+│  1. Sort BAMs  │
+└────────────────┘
   │
   │ Input: 'BAMs/'
   │ Output: 'Sorted/' directory with sorted BAMs
@@ -104,19 +104,9 @@ Input: Directory of BAM files (e.g., 'BAMs/')
   └─► submitAll -i Sbatch/sort
   │
   ▼
-┌───────────────────┐
-│  2. Index BAMs    │
-└───────────────────┘
-  │
-  │ Input: 'Sorted/'
-  │ Output: '.bai' index files in 'Sorted/'
-  │
-  └─► nohup indexBAM -i Sorted -j 8 > index.log 2>&1 &
-  │
-  ▼
-┌───────────────────┐
-│   3. Merge BAMs   │
-└───────────────────┘
+┌─────────────────┐
+│  2. Merge BAMs  │
+└─────────────────┘
   │
   │ Input: 'Sorted/' directory, 'SampleSheet.csv'
   │ Output: 'Merged/' directory with merged BAMs
@@ -129,7 +119,17 @@ Input: Directory of BAM files (e.g., 'BAMs/')
   └─► submitAll -i Sbatch/merge
   │
   ▼
-Final Output: Directory of sorted, indexed, and merged BAM files ready for the PGx workflow.
+┌─────────────────┐
+│  3. Index BAMs  │
+└─────────────────┘
+  │
+  │ Input: 'Sorted/'
+  │ Output: '.bai' index files in 'Sorted/'
+  │
+  └─► nohup indexBAM -i Sorted -j 8 > index.log 2>&1 &
+  │
+  ▼
+Final Output: Directory of sorted, merged, and indexed BAM files ready for the PGx workflow.
 ```
 
 ### Step 1: Sort BAM Files
@@ -161,15 +161,7 @@ Finally, submit all sorting jobs to Slurm.
 submitAll -i Sbatch/sort
 ```
 
-### Step 2: Index Sorted BAM Files
-
-After the sorting jobs are complete, index the sorted BAM files in the `Sorted/` directory. It is recommended to run this process with `nohup` to prevent interruptions.
-
-```bash
-nohup indexBAM -i Sorted -j 8 > index.log 2>&1 &
-```
-
-### Step 3: Merge BAM Files by Sample
+### Step 2: Merge BAM Files by Sample
 
 Generate merge commands using a `SampleSheet.csv` file.
 
@@ -196,6 +188,14 @@ Submit the merge jobs.
 
 ```bash
 submitAll -i Sbatch/merge
+```
+
+### Step 3: Index Merged BAM Files
+
+After the merging jobs are complete, index the merged BAM files in the `Merged/` directory. It is recommended to run this process with `nohup` to prevent interruptions.
+
+```bash
+nohup indexBAM -i Merged -j 8 > index.log 2>&1 &
 ```
 
 ## Future Plans
