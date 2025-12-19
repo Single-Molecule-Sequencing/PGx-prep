@@ -83,6 +83,13 @@ submitAll -i <sbatch_directory>
 
 ## Workflow
 
+Make sure to set up and activate the conda environment using the provided `env.yml`.
+
+```
+conda env create -f env.yml
+conda activate pgxprep
+```
+
 The workflow expects a directory of raw BAM files as the initial input.
 
 ```
