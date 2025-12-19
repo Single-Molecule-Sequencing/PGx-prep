@@ -35,7 +35,7 @@ mergeBAM <samplesheet_csv> -d <bam_directory> -o <output_directory> -f <output_f
 ```
 
 -   `csv`: Path to the SampleSheet CSV file (required).
--   `-d, --bamdir`: Directory containing sorted & indexed BAM files (default: `.`).
+-   `-d, --bamdir`: Directory containing sorted BAM files (default: `.`).
 -   `-o, --outdir`: Directory to store merged BAMs (default: `./Merged`).
 -   `-f, --outfile`: Output file to write merge commands (default: `mergeCMDs.txt`).
 
